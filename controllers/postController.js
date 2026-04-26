@@ -16,24 +16,14 @@ function index (req, res) {
 });
 };
 function show (req, res) {
-    const id = parseInt(req.params.id)
-
-    // cerchiamo il post tramite id
-    const postTrovato = postsRouter.find( post => post.id === id);
-
-    // facciamo il controllo
-    if(!postTrovato){
-        // imposto lo status 404
-        res.status(404)
-
-        // restituisco un JSON con le altre informazioni
-        return res.json({
-            error: "Not Found",
-            message: "Post non trovato"
-        });
-    }
-    // restituisco un JSON con il post trovato
-    res.json(postTrovato);
+    // recuperiamo l'id dall' URL
+    const id = req.params.id
+    const sql = 'SELECT * FROM posts WHERE id = ?';
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database query failed' });
+        if (results.length === 0) return res.status(404).json({ error: 'Pizza not found' });
+        res.json(results[0]);
+});
 };
 function store (req, res) {
     // Creiamo un nuovo id incrementando l'ultimo id presente
