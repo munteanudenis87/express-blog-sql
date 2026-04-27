@@ -21,7 +21,7 @@ function show (req, res) {
     const sql = 'SELECT * FROM posts WHERE id = ?';
     connection.query(sql, [id], (err, results) => {
         if (err) return res.status(500).json({ error: 'Database query failed' });
-        if (results.length === 0) return res.status(404).json({ error: 'Pizza not found' });
+        if (results.length === 0) return res.status(404).json({ error: 'Post not found' });
         res.json(results[0]);
 });
 };
@@ -105,25 +105,13 @@ function modify (req, res) {
     res.json(post);
 };
 function destroy (req, res) {
-    const id = parseInt(req.params.id);
-
-    //cerchiamo il post tramite id
-    const post = postsRouter.find(post => post.id === id);
-
-    if (!post) {
-        res.status(404);
-
-        return res.json({
-            status: 404,
-            error: "Not Found",
-            message: "Post non trovato"
-        })
-    }
-    // Rimuoviamo il post
-    postsRouter.splice(postsRouter.indexOf(post), 1);
-
-    // Returniamo lo status corretto
-    res.sendStatus(204)
+    // recuperiamo l'id dall' URL
+    const { id } = req.params;
+    //Eliminiamo la pizza dal menu
+    connection.query('DELETE FROM posts WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ error: 'Failed to delete post' });
+        res.sendStatus(204)
+    });
 };
 
 // esportiamo le funzioni per il router
