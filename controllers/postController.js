@@ -9,7 +9,7 @@ const connection = require('../data/db');
 function index (req, res) {
     // prepariamo la query
     const sql = 'SELECT * FROM posts';
-    // eseguiamo la query!
+    // eseguiamo la query per i tags con una join e where
     connection.query(sql, (err, results) => {
         if (err) return res.status(500).json({ error: 'Database query failed' });
         res.json(results);
@@ -19,10 +19,30 @@ function show (req, res) {
     // recuperiamo l'id dall' URL
     const id = req.params.id
     const sql = 'SELECT * FROM posts WHERE id = ?';
+
+    // Prepariamo la query
+    const tagsSql = `
+    select T.*
+    from tags T
+    join post_tag PT on T.id = PT.tag_id
+    where PT.post_id = ?`;
+
     connection.query(sql, [id], (err, results) => {
         if (err) return res.status(500).json({ error: 'Database query failed' });
         if (results.length === 0) return res.status(404).json({ error: 'Post not found' });
-        res.json(results[0]);
+
+        // Recuperiamo il post
+        const post = results[0];
+
+        // Se è andata bene, eseguiamo la seconda query per i tags
+        connection.query(tagsSql, [id], (err, results) => {
+            if (err) return res.status(500).json({ error: 'Database query failed'});
+
+            // Aggiungiamo i tags al post
+            post.tags = results;
+            // Returniamo il post con la nuova prop tags
+            res.json(post);
+        })
 });
 };
 function store (req, res) {
