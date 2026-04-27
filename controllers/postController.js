@@ -46,26 +46,19 @@ function show (req, res) {
 });
 };
 function store (req, res) {
-    // Creiamo un nuovo id incrementando l'ultimo id presente
-    const newId = postsRouter[postsRouter.length - 1].id + 1;
-    
-    // Creiamo un nuovo post
-    const newPost = {
-        id: newId,
-        title: req.body.title,
-        content: req.body.content,
-        image: req.body.image,
-        tags: req.body.tags
-    }
-    // Aggiungiamo il nuovo post
-    postsRouter.push(newPost);
-
-    // Controlliamo
-    console.log(postsRouter);
-
-    // Restituiamo lo status corretto e il post creato
-    res.status(201);
-    res.json(newPost);
+    const { title, content, image } = req.body;
+    // prepariamo la query
+    const sql = 'INSERT INTO posts (title, content, image) VALUES (?, ?, ?)'
+    // eseguiamo la query
+    connection.query(
+        sql,
+        [title, content, image],
+        (err, results) => {
+            if (err) return res.status(500).json({ error: 'Failed to insert post' });
+                res.status(201); // status corretto
+                console.log(results)
+                res.json({ id: results.insertId }); // restituiamo l'id assegnato dal DB
+        });
 };
 function update (req, res) {
     // res.send('Modifica integrale post ' + req.params.id);
