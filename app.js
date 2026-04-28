@@ -8,14 +8,14 @@ const postRouter = require('./routers/post');
 const checkTime = require("./middlewares/checkTime");
 
 // importo middleware di gestione errore interni server 500
-const errorsHandler = require('./middlewares/errorsHandler');
+//const errorsHandler = require('./middlewares/errorsHandler');
 
 // importo middleware di gestione errore di chiamata su rotta inesistente 404
 const notFound = require('./middlewares/notFound');
 
+app.use(express.static('public'));
 // Attivazione body parser per formato json per le rotte
 app.use(express.json());
-app.use(express.static('public'));
 
 // registra globalmente il middleware di gestione
 app.use(checkTime);
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 app.use('/posts', postRouter);
 
 // registra globalmente il middleware di gestione errore interno server 500
-app.use(errorsHandler);
+//app.use(errorsHandler);
 
 // registra globalmente il middleware di gestione chiamata su rotta inesistente 404
 app.use(notFound);
